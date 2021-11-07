@@ -3,3 +3,5 @@ dist/*
 log_viewer/migrations
 log_viewer/migrations/*
 *.pyc
+django_simple_log_viewer.egg-info
+django_simple_log_viewer.egg-info/*

@@ -35,3 +35,8 @@ NB: Make sure to add a ``.`` before the extension name
 
 3. To change the theme of the view page, extend ``log_viewer/log_home`` and set the theme name in the block theme. e.g:
 ``{% block theme%} green {% endblock %}``. (Options: purple | azure | green | orange | danger)
+
+
+.. image:: sample_log.jpg
+    :width: 600
+    :alt: Sample Image

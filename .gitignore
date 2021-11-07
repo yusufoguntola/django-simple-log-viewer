@@ -1,0 +1,5 @@
+dist
+dist/*
+log_viewer/migrations
+log_viewer/migrations/*
+*.pyc

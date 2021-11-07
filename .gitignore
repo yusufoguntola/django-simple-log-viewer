@@ -9,3 +9,5 @@ build
 build/*
 .eggs
 .eggs/*
+.idea
+.idea/*

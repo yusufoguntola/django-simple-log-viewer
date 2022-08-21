@@ -22,8 +22,9 @@ Adding it to your project
 
 3. Add Log viewer to your URL conf:: ``path('log-viewer', include('log_viewer.urls')),`` OR ``url('log-viewer', include('log_viewer.urls'))`` as the case may be
 
-
 4. Visit the log viewer URL to view your logs
+
+5. Note that only users with ``'superuser'`` permission can view the log page.
 
 
 SETTINGS

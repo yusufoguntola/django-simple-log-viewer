@@ -13,3 +13,13 @@ build/*
 .idea/*
 notes.txt
 todo.md
+plans
+plans/*
+demo_logs
+demo_logs/*
+demo.sqlite3
+demo_auth_middleware.py
+demo_urls.py
+run_demo.py
+preview.html
+render_preview.py

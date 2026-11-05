@@ -171,6 +171,8 @@ class LogManager:
                 or log_basename == expected_default_name
                 or filename.endswith(expected_default_name)
                 or log_basename.startswith(base_name)
+                or name.startswith(log_basename)
+                or (base_name and name.startswith(base_name))
             ):
                 matched_log = log
                 break

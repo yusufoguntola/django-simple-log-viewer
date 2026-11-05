@@ -1,0 +1,1817 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ default_theme }}">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{{ site_name }} - Log Analytics Dashboard</title>
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #111827;
+            --bg-card: #141d2e;
+            --bg-card-hover: #1c263c;
+            --border-color: #1f293d;
+            --border-highlight: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-blue-bg: rgba(59, 130, 246, 0.15);
+            --level-error: #ef4444;
+            --level-error-bg: rgba(239, 68, 68, 0.18);
+            --level-warn: #f59e0b;
+            --level-warn-bg: rgba(245, 158, 11, 0.18);
+            --level-info: #10b981;
+            --level-info-bg: rgba(16, 185, 129, 0.18);
+            --level-debug: #6366f1;
+            --level-debug-bg: rgba(99, 102, 241, 0.18);
+            --level-critical: #ec4899;
+            --level-critical-bg: rgba(236, 72, 153, 0.18);
+            --pill-stripped-bg: #831843;
+            --pill-stripped-text: #fbcfe8;
+            --chart-bar-bg: #1e293b;
+            --chart-bar-active: #3b82f6;
+            --chart-bar-error: #ef4444;
+            --code-bg: #090d16;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --transition: all 0.2s ease-in-out;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f1f5f9;
+            --border-color: #e2e8f0;
+            --border-highlight: #cbd5e1;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --code-bg: #f1f5f9;
+            --chart-bar-bg: #e2e8f0;
+            --chart-bar-active: #2563eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            font-size: 14px;
+            min-height: 100vh;
+        }
+
+        a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        /* App Header */
+        .app-header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            backdrop-filter: blur(8px);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo-icon {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .brand-title {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .brand-tag {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 600;
+            background: var(--accent-blue-bg);
+            color: var(--accent-blue);
+            padding: 2px 8px;
+            border-radius: 12px;
+            letter-spacing: 0.05em;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .user-role-pill {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 1px 6px;
+            border-radius: 10px;
+        }
+
+        .btn-ctrl {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-ctrl:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-highlight);
+        }
+
+        .btn-ctrl.primary {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: #ffffff;
+        }
+
+        .btn-ctrl.primary:hover {
+            background: #2563eb;
+        }
+
+        /* Container */
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* File Switcher Bar */
+        .file-switcher-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            overflow-x: auto;
+        }
+
+        .file-switcher-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .file-pills-list {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+
+        .file-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+
+        .file-pill:hover {
+            border-color: var(--accent-blue);
+            color: var(--text-primary);
+        }
+
+        .file-pill.active {
+            background: var(--accent-blue-bg);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .file-pill-size {
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 6px;
+            border-radius: 8px;
+            color: var(--text-muted);
+        }
+
+        .file-pill.active .file-pill-size {
+            background: rgba(59, 130, 246, 0.25);
+            color: var(--accent-blue);
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+        }
+
+        .kpi-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border-highlight);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+        }
+
+        .kpi-value {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .kpi-subtext {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .rate-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .rate-badge.danger {
+            background: var(--level-error-bg);
+            color: var(--level-error);
+        }
+
+        .rate-badge.success {
+            background: var(--level-info-bg);
+            color: var(--level-info);
+        }
+
+        .kpi-card.errors {
+            border-left: 4px solid var(--level-error);
+        }
+
+        .kpi-card.warnings {
+            border-left: 4px solid var(--level-warn);
+        }
+
+        .kpi-card.info {
+            border-left: 4px solid var(--level-info);
+        }
+
+        .kpi-card.debug {
+            border-left: 4px solid var(--level-debug);
+        }
+
+        /* 24-Hour Traffic Chart Card */
+        .chart-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chart-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .histogram-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 90px;
+            padding: 10px 0 2px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .histogram-bar-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .histogram-bar-col:hover .bar-segment {
+            filter: brightness(1.25);
+        }
+
+        .histogram-bar-col:hover .bar-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .bar-segment {
+            width: 100%;
+            background: var(--chart-bar-active);
+            border-radius: 3px 3px 0 0;
+            min-height: 3px;
+            transition: height 0.3s ease;
+        }
+
+        .bar-segment.has-error {
+            background: linear-gradient(to top, var(--chart-bar-active) 70%, var(--level-error) 70%);
+        }
+
+        .bar-tooltip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 105%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000000;
+            color: #ffffff;
+            font-size: 11px;
+            padding: 5px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 50;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border: 1px solid var(--border-highlight);
+            transition: opacity 0.15s ease;
+        }
+
+        .histogram-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            padding-top: 4px;
+        }
+
+        /* Entity Scanner Card */
+        .scanner-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .scanner-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .scanner-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scanner-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-input-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 2px 10px;
+        }
+
+        .form-input-group:focus-within {
+            border-color: var(--accent-blue);
+        }
+
+        .form-input-group i {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .form-control-input, .form-select-input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 13px;
+            padding: 7px 4px;
+            outline: none;
+        }
+
+        .form-select-input option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* Entity Timeline Banner */
+        .timeline-banner {
+            display: none;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+            border: 1px solid var(--border-highlight);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            flex-direction: column;
+            gap: 14px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .timeline-banner-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .timeline-badge-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .entity-target-pill {
+            background: #8b5cf6;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 12px;
+            letter-spacing: 0.03em;
+        }
+
+        .timeline-tabs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 3px;
+            border-radius: var(--radius-sm);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            background: var(--accent-blue);
+            color: #ffffff;
+        }
+
+        .tab-count-badge {
+            background: rgba(0, 0, 0, 0.25);
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 8px;
+        }
+
+        /* Timeline Nodes Layout */
+        .timeline-steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+
+        .timeline-steps-container::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 10px;
+            bottom: 10px;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .timeline-step-node {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            position: relative;
+        }
+
+        .step-circle {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            border: 3px solid var(--bg-secondary);
+            position: absolute;
+            left: -20px;
+            top: 4px;
+            z-index: 2;
+        }
+
+        .timeline-node-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .node-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .stage-pill {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .stage-pill.blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .stage-pill.indigo { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+        .stage-pill.purple { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+        .stage-pill.cyan { background: rgba(6, 182, 212, 0.2); color: #22d3ee; }
+        .stage-pill.teal { background: rgba(20, 184, 166, 0.2); color: #2dd4bf; }
+        .stage-pill.green { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .stage-pill.red { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+        /* Main Log Table Section */
+        .logs-section-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logs-toolbar {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .logs-filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            text-align: left;
+        }
+
+        .log-table th {
+            background: var(--bg-card);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .log-table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        .log-table tr:hover td {
+            background: var(--bg-card-hover);
+        }
+
+        .level-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: nowrap;
+        }
+
+        .level-badge.ERROR { background: var(--level-error-bg); color: var(--level-error); }
+        .level-badge.CRITICAL { background: var(--level-critical-bg); color: var(--level-critical); }
+        .level-badge.WARN { background: var(--level-warn-bg); color: var(--level-warn); }
+        .level-badge.INFO { background: var(--level-info-bg); color: var(--level-info); }
+        .level-badge.DEBUG { background: var(--level-debug-bg); color: var(--level-debug); }
+
+        .entity-pill {
+            background: rgba(139, 92, 246, 0.18);
+            color: #a78bfa;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: var(--transition);
+        }
+
+        .entity-pill:hover {
+            background: rgba(139, 92, 246, 0.35);
+            color: #ffffff;
+        }
+
+        .stripped-pill {
+            background: var(--pill-stripped-bg);
+            color: var(--pill-stripped-text);
+            font-size: 11px;
+            font-weight: 500;
+            padding: 2px 7px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .highlight-match {
+            background: #ca8a04;
+            color: #ffffff;
+            padding: 0 2px;
+            border-radius: 2px;
+            font-weight: 600;
+        }
+
+        .message-cell {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            word-break: break-word;
+            white-space: pre-wrap;
+            max-width: 650px;
+            line-height: 1.4;
+        }
+
+        .time-cell {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        /* Pagination Footer */
+        .logs-pagination-footer {
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .pagination-btns {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Detail Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-content-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal-payload-box {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-card);
+        }
+
+        .alert-sanitized {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: var(--radius-sm);
+            padding: 10px 14px;
+            font-size: 12px;
+            color: #fbbf24;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .app-header { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .header-actions { width: 100%; justify-content: space-between; }
+            .scanner-toolbar { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Application Bar -->
+    <header class="app-header">
+        <div class="header-brand">
+            <div class="brand-logo-icon"><i class="fa fa-chart-line"></i></div>
+            <div>
+                <span class="brand-title">{{ site_name }}</span>
+                <span class="brand-tag">Analytics</span>
+            </div>
+            {% if active_file %}
+                <span class="user-badge"><i class="fa fa-file-alt"></i> <strong id="header-active-file">{{ active_file }}</strong></span>
+            {% endif %}
+        </div>
+
+        <div class="header-actions">
+            <div class="user-badge">
+                <i class="fa fa-user-shield"></i>
+                <span>{{ user_display }}</span>
+                {% if is_super_admin %}
+                    <span class="user-role-pill">Super Admin</span>
+                {% else %}
+                    <span class="user-role-pill">Admin</span>
+                {% endif %}
+            </div>
+
+            <!-- Auto-Refresh Selector -->
+            <div class="form-input-group" style="padding: 1px 8px;">
+                <i class="fa fa-sync-alt" id="refresh-icon"></i>
+                <select id="auto-refresh-select" class="form-select-input" onchange="changeAutoRefresh(this.value)">
+                    {% for sec in auto_refresh_intervals %}
+                        <option value="{{ sec }}" {% if sec == default_auto_refresh %}selected{% endif %}>
+                            {% if sec == 0 %}Refresh: Off{% else %}Refresh: {{ sec }}s{% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Export Buttons -->
+            <button class="btn-ctrl" onclick="exportLogs('json')"><i class="fa fa-download"></i> JSON</button>
+            <button class="btn-ctrl" onclick="exportLogs('csv')"><i class="fa fa-file-csv"></i> CSV</button>
+
+            <!-- Classic View Toggle -->
+            <a href="?view=classic{% if active_file %}&name={{ active_file }}{% endif %}" class="btn-ctrl" title="Switch to Classic DataTables View">
+                <i class="fa fa-table"></i> Classic View
+            </a>
+
+            <!-- Theme Toggle -->
+            <button class="btn-ctrl" onclick="toggleTheme()" id="theme-toggle-btn" title="Toggle Theme">
+                <i class="fa fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+
+        <!-- Available Log Files Switcher Bar -->
+        <div class="file-switcher-card">
+            <span class="file-switcher-title"><i class="fa fa-layer-group"></i> Files:</span>
+            <div class="file-pills-list">
+                {% for f in available_files %}
+                    <button class="file-pill {% if f.name == active_file %}active{% endif %}" onclick="switchLogFile('{{ f.name }}')">
+                        <i class="fa fa-file-code"></i>
+                        <span>{{ f.name }}</span>
+                        <span class="file-pill-size">{{ f.size_formatted }}</span>
+                    </button>
+                {% empty %}
+                    <span style="color: var(--text-muted); font-size: 13px;">No log files discovered</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- KPI Metrics Grid -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span>Total Logs</span>
+                    <i class="fa fa-list-ul"></i>
+                </div>
+                <div class="kpi-value" id="kpi-total">{{ overview.total_entries|default:"0" }}</div>
+                <div class="kpi-subtext">Across current selection</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span>File Size</span>
+                    <i class="fa fa-hdd"></i>
+                </div>
+                <div class="kpi-value" id="kpi-size">{{ overview.file_size_formatted|default:"0 B" }}</div>
+                <div class="kpi-subtext">On server disk</div>
+            </div>
+
+            <div class="kpi-card errors">
+                <div class="kpi-header">
+                    <span>Errors & Critical</span>
+                    <i class="fa fa-exclamation-triangle" style="color: var(--level-error);"></i>
+                </div>
+                <div class="kpi-value" style="color: var(--level-error);" id="kpi-errors">
+                    {{ overview.error_count|default:"0" }}
+                    <span class="rate-badge danger" id="kpi-error-rate">{{ overview.error_rate|default:"0.00%" }}</span>
+                </div>
+                <div class="kpi-subtext">Error rate percentage</div>
+            </div>
+
+            <div class="kpi-card warnings">
+                <div class="kpi-header">
+                    <span>Warnings</span>
+                    <i class="fa fa-bell" style="color: var(--level-warn);"></i>
+                </div>
+                <div class="kpi-value" style="color: var(--level-warn);" id="kpi-warnings">{{ overview.warning_count|default:"0" }}</div>
+                <div class="kpi-subtext">Needs attention</div>
+            </div>
+
+            <div class="kpi-card info">
+                <div class="kpi-header">
+                    <span>Info</span>
+                    <i class="fa fa-info-circle" style="color: var(--level-info);"></i>
+                </div>
+                <div class="kpi-value" style="color: var(--level-info);" id="kpi-info">{{ overview.info_count|default:"0" }}</div>
+                <div class="kpi-subtext">Normal operations</div>
+            </div>
+
+            <div class="kpi-card debug">
+                <div class="kpi-header">
+                    <span>Debug</span>
+                    <i class="fa fa-bug" style="color: var(--level-debug);"></i>
+                </div>
+                <div class="kpi-value" style="color: var(--level-debug);" id="kpi-debug">{{ overview.debug_count|default:"0" }}</div>
+                <div class="kpi-subtext">Verbose diagnostics</div>
+            </div>
+        </div>
+
+        <!-- 24-Hour Traffic Distribution Histogram -->
+        {% if hourly_chart_enabled %}
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">
+                    <i class="fa fa-chart-column" style="color: var(--accent-blue);"></i>
+                    <span>24-Hour Activity & Surge Histogram</span>
+                </div>
+                <div class="chart-subtitle" id="chart-surge-label">
+                    {% if overview.has_traffic_surge %}
+                        <span style="color: #fbbf24;"><i class="fa fa-bolt"></i> Peak volume surge at {{ overview.peak_hour }} ({{ overview.peak_count }} logs)</span>
+                    {% else %}
+                        <span>Hourly log volume distribution across the day</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="histogram-container" id="histogram-bars">
+                {% for item in overview.hourly_traffic %}
+                    <div class="histogram-bar-col" title="{{ item.hour }}: {{ item.count }} logs ({{ item.error_count }} errors)">
+                        <div class="bar-tooltip">{{ item.hour }}: {{ item.count }} logs ({{ item.error_count }} err)</div>
+                        <div class="bar-segment {% if item.error_count > 0 %}has-error{% endif %}"
+                             style="height: {% if overview.total_entries > 0 %}{% widthratio item.count overview.total_entries 100 %}%{% else %}3px{% endif %}; min-height: 4px;"></div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="histogram-labels">
+                <span>00:00</span>
+                <span>03:00</span>
+                <span>06:00</span>
+                <span>09:00</span>
+                <span>12:00</span>
+                <span>15:00</span>
+                <span>18:00</span>
+                <span>21:00</span>
+                <span>23:00</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Request & Transaction Trace Scanner Toolbar -->
+        <div class="scanner-card">
+            <div class="scanner-header">
+                <div class="scanner-title">
+                    <i class="fa fa-crosshairs" style="color: #a78bfa;"></i>
+                    <span>Request & Transaction Trace Scanner</span>
+                </div>
+                <span style="font-size: 12px; color: var(--text-muted);">Trace Request ID, Correlation ID, Trace ID, User ID, Task ID, or UUID across log files</span>
+            </div>
+
+            <div class="scanner-toolbar">
+                <div class="form-input-group" style="flex: 2; min-width: 220px;">
+                    <i class="fa fa-search"></i>
+                    <input type="text" id="scan-entity-input" class="form-control-input" placeholder="Enter ID (e.g. req-9876, user_42, trace-abc, 550e8400...)" onkeydown="if(event.key==='Enter') executeScan();"/>
+                </div>
+
+                <div class="form-input-group">
+                    <i class="fa fa-calendar-alt"></i>
+                    <select id="scan-scope-select" class="form-select-input" onchange="toggleScopeDates(this.value)">
+                        <option value="selected">Selected File Only</option>
+                        <option value="all">All Available Files</option>
+                        <option value="range">Custom Date Range...</option>
+                    </select>
+                </div>
+
+                <div id="scan-date-range-box" style="display: none; gap: 8px;">
+                    <div class="form-input-group">
+                        <span style="font-size: 11px; color: var(--text-muted);">From:</span>
+                        <input type="date" id="scan-start-date" class="form-control-input"/>
+                    </div>
+                    <div class="form-input-group">
+                        <span style="font-size: 11px; color: var(--text-muted);">To:</span>
+                        <input type="date" id="scan-end-date" class="form-control-input"/>
+                    </div>
+                </div>
+
+                <div class="form-input-group">
+                    <i class="fa fa-filter"></i>
+                    <select id="scan-level-select" class="form-select-input">
+                        <option value="ALL">Fast Filter: All Levels</option>
+                        <option value="ERROR">Fast Mode: Error & Critical Only</option>
+                        <option value="WARN">Warnings Only</option>
+                        <option value="INFO">Info Only</option>
+                        <option value="DEBUG">Debug Only</option>
+                    </select>
+                </div>
+
+                <button class="btn-ctrl primary" onclick="executeScan()" id="scan-action-btn">
+                    <i class="fa fa-play"></i>
+                    <span>Scan & Trace</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Entity Timeline Banner (Rendered dynamically when scan finishes) -->
+        <div id="entity-timeline-banner" class="timeline-banner">
+            <div class="timeline-banner-header">
+                <div class="timeline-badge-group">
+                    <span class="entity-target-pill" id="tb-entity-pill">#ID</span>
+                    <span style="font-size: 13px; font-weight: 600;" id="tb-summary-text">Found 0 events</span>
+                    <span class="rate-badge" style="background: var(--bg-card); color: var(--text-secondary);" id="tb-scope-pill">Selected File</span>
+                    <span style="font-size: 11px; color: var(--text-muted);" id="tb-latency-text">0 ms</span>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="timeline-tabs" id="tb-severity-tabs">
+                        <button class="tab-btn active" onclick="filterTimelineLevel('ALL')">ALL <span class="tab-count-badge" id="tb-cnt-all">0</span></button>
+                        <button class="tab-btn" onclick="filterTimelineLevel('ERROR')">ERROR <span class="tab-count-badge" id="tb-cnt-err">0</span></button>
+                        <button class="tab-btn" onclick="filterTimelineLevel('WARN')">WARN <span class="tab-count-badge" id="tb-cnt-warn">0</span></button>
+                        <button class="tab-btn" onclick="filterTimelineLevel('INFO')">INFO <span class="tab-count-badge" id="tb-cnt-info">0</span></button>
+                        <button class="tab-btn" onclick="filterTimelineLevel('DEBUG')">DEBUG <span class="tab-count-badge" id="tb-cnt-debug">0</span></button>
+                    </div>
+
+                    <div class="timeline-tabs">
+                        <button class="tab-btn active" id="btn-view-timeline" onclick="switchTimelineView('timeline')"><i class="fa fa-stream"></i> Timeline</button>
+                        <button class="tab-btn" id="btn-view-table" onclick="switchTimelineView('table')"><i class="fa fa-table"></i> Table</button>
+                    </div>
+
+                    <button class="btn-ctrl" onclick="closeTimelineBanner()" title="Close Scan Results"><i class="fa fa-times"></i></button>
+                </div>
+            </div>
+
+            <!-- Timeline Step Nodes -->
+            <div id="timeline-nodes-box" class="timeline-steps-container"></div>
+        </div>
+
+        <!-- Main Logs Explorer Section -->
+        <div class="logs-section-card">
+            <div class="logs-toolbar">
+                <div class="logs-filter-group">
+                    <div class="timeline-tabs" id="main-level-tabs">
+                        <button class="tab-btn active" onclick="setMainLevelFilter('ALL')">ALL</button>
+                        <button class="tab-btn" onclick="setMainLevelFilter('ERROR')">ERROR</button>
+                        <button class="tab-btn" onclick="setMainLevelFilter('WARN')">WARN</button>
+                        <button class="tab-btn" onclick="setMainLevelFilter('INFO')">INFO</button>
+                        <button class="tab-btn" onclick="setMainLevelFilter('DEBUG')">DEBUG</button>
+                    </div>
+
+                    <div class="form-input-group" style="min-width: 250px;">
+                        <i class="fa fa-search"></i>
+                        <input type="text" id="main-keyword-input" class="form-control-input" placeholder="Search keywords..." oninput="debounceKeywordSearch()"/>
+                    </div>
+                </div>
+
+                <div class="logs-filter-group">
+                    <span style="font-size: 12px; color: var(--text-muted);">Rows:</span>
+                    <select id="main-page-size-select" class="form-select-input" onchange="changePageSize(this.value)">
+                        <option value="25">25</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                    </select>
+
+                    <button class="btn-ctrl" onclick="reloadCurrentLogs()"><i class="fa fa-redo"></i></button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="log-table" id="main-log-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th style="width: 160px;">Timestamp</th>
+                            <th style="width: 80px;">Level</th>
+                            <th style="width: 140px;">Logger</th>
+                            <th style="width: 120px;">Entity</th>
+                            <th>Message</th>
+                            <th style="width: 70px; text-align: center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="main-table-tbody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                                <i class="fa fa-spinner fa-spin"></i> Loading log entries...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="logs-pagination-footer">
+                <div>
+                    Showing <span id="pag-start">0</span> - <span id="pag-end">0</span> of <span id="pag-total">0</span> entries
+                </div>
+                <div class="pagination-btns">
+                    <button class="btn-ctrl" id="pag-btn-prev" onclick="goToPrevPage()"><i class="fa fa-chevron-left"></i> Prev</button>
+                    <span style="padding: 0 8px; font-weight: 600;" id="pag-current-page">1 / 1</span>
+                    <button class="btn-ctrl" id="pag-btn-next" onclick="goToNextPage()">Next <i class="fa fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Detail & Raw Payload Modal -->
+    <div id="detail-modal" class="modal-overlay" onclick="if(event.target===this) closeModal();">
+        <div class="modal-content-box">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="modal-level-badge" class="level-badge INFO">INFO</span>
+                    <span id="modal-timestamp" style="font-family: 'JetBrains Mono', monospace; font-size: 13px;"></span>
+                    <span id="modal-logger" style="color: var(--text-muted); font-size: 12px;"></span>
+                </div>
+                <button class="btn-ctrl" onclick="closeModal()"><i class="fa fa-times"></i></button>
+            </div>
+
+            <div class="modal-body">
+                <div id="modal-sanitized-banner" class="alert-sanitized" style="display: none;">
+                    <i class="fa fa-shield-alt"></i>
+                    <span>This entry was sanitized in the table view to protect DOM responsiveness. Full original payload is displayed below.</span>
+                </div>
+
+                <div id="modal-entities-box" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;"></div>
+
+                <div>
+                    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 6px;">
+                        Full Payload & Message
+                    </div>
+                    <pre id="modal-raw-payload" class="modal-payload-box"></pre>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button class="btn-ctrl" onclick="formatModalJSON()"><i class="fa fa-code"></i> Format JSON</button>
+                    <button class="btn-ctrl" onclick="copyModalPayload()"><i class="fa fa-copy"></i> <span id="btn-copy-label">Copy Payload</span></button>
+                </div>
+                <button class="btn-ctrl primary" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Interactive Client Script -->
+    <script>
+        const URLS = {
+            overview: "{% url 'log_analytics_overview' %}",
+            logs: "{% url 'log_analytics_logs' %}",
+            scan: "{% url 'log_analytics_scan' %}",
+            detail: "{% url 'log_analytics_detail' %}",
+            files: "{% url 'log_analytics_files' %}",
+            export: "{% url 'log_analytics_export' %}"
+        };
+
+        const STATE = {
+            activeFile: "{{ active_file|default:'' }}",
+            currentLevel: 'ALL',
+            keyword: '',
+            page: 1,
+            limit: {{ page_size|default:50 }},
+            totalPages: 1,
+            autoRefreshTimer: null,
+            scanResult: null,
+            activeScanLevel: 'ALL',
+            timelineViewMode: 'timeline',
+            theme: document.documentElement.getAttribute('data-theme') || 'dark',
+            currentDetailData: null
+        };
+
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', function() {
+            reloadCurrentLogs();
+            initAutoRefresh({{ default_auto_refresh|default:0 }});
+        });
+
+        // Theme management
+        function toggleTheme() {
+            STATE.theme = STATE.theme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', STATE.theme);
+            const icon = document.querySelector('#theme-toggle-btn i');
+            if (icon) {
+                icon.className = STATE.theme === 'dark' ? 'fa fa-moon' : 'fa fa-sun';
+            }
+        }
+
+        // Switch active log file
+        function switchLogFile(filename) {
+            STATE.activeFile = filename;
+            STATE.page = 1;
+            const headerActive = document.getElementById('header-active-file');
+            if (headerActive) headerActive.textContent = filename;
+
+            document.querySelectorAll('.file-pill').forEach(btn => {
+                if (btn.textContent.includes(filename)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Refresh overview & logs
+            loadOverview(filename);
+            reloadCurrentLogs();
+        }
+
+        // Load overview & update KPIs / chart
+        function loadOverview(filename) {
+            fetch(`${URLS.overview}?file=${encodeURIComponent(filename)}`)
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('kpi-total').textContent = Number(data.total_entries).toLocaleString();
+                    document.getElementById('kpi-size').textContent = data.file_size_formatted || '0 B';
+                    document.getElementById('kpi-errors').childNodes[0].textContent = Number(data.error_count).toLocaleString() + ' ';
+                    document.getElementById('kpi-error-rate').textContent = data.error_rate || '0.00%';
+                    document.getElementById('kpi-warnings').textContent = Number(data.warning_count).toLocaleString();
+                    document.getElementById('kpi-info').textContent = Number(data.info_count).toLocaleString();
+                    document.getElementById('kpi-debug').textContent = Number(data.debug_count).toLocaleString();
+
+                    // Update Histogram
+                    const barsBox = document.getElementById('histogram-bars');
+                    if (barsBox && data.hourly_traffic) {
+                        barsBox.innerHTML = '';
+                        const total = data.total_entries || 1;
+                        data.hourly_traffic.forEach(item => {
+                            const pct = Math.max(4, Math.round((item.count / total) * 100));
+                            const col = document.createElement('div');
+                            col.className = 'histogram-bar-col';
+                            col.innerHTML = `
+                                <div class="bar-tooltip">${item.hour}: ${item.count} logs (${item.error_count} err)</div>
+                                <div class="bar-segment ${item.error_count > 0 ? 'has-error' : ''}" style="height: ${pct}%;"></div>
+                            `;
+                            barsBox.appendChild(col);
+                        });
+                    }
+
+                    const surgeLabel = document.getElementById('chart-surge-label');
+                    if (surgeLabel) {
+                        if (data.has_traffic_surge) {
+                            surgeLabel.innerHTML = `<span style="color: #fbbf24;"><i class="fa fa-bolt"></i> Peak volume surge at ${data.peak_hour} (${data.peak_count} logs)</span>`;
+                        } else {
+                            surgeLabel.innerHTML = `<span>Hourly log volume distribution across the day</span>`;
+                        }
+                    }
+                })
+                .catch(err => console.error('Failed to load overview:', err));
+        }
+
+        // Fetch logs page
+        function reloadCurrentLogs() {
+            const tbody = document.getElementById('main-table-tbody');
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);"><i class="fa fa-spinner fa-spin"></i> Loading...</td></tr>`;
+
+            const url = `${URLS.logs}?file=${encodeURIComponent(STATE.activeFile)}&level=${STATE.currentLevel}&keyword=${encodeURIComponent(STATE.keyword)}&page=${STATE.page}&limit=${STATE.limit}`;
+
+            fetch(url)
+                .then(r => r.json())
+                .then(data => {
+                    renderLogsTable(data.entries || []);
+                    updatePagination(data);
+                })
+                .catch(err => {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--level-error);"><i class="fa fa-exclamation-triangle"></i> Error loading logs: ${err.message}</td></tr>`;
+                });
+        }
+
+        // Render rows in table
+        function renderLogsTable(entries) {
+            const tbody = document.getElementById('main-table-tbody');
+            if (!entries || entries.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--text-muted);">No log entries match the selected filters.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            const keyword = STATE.keyword.trim().toLowerCase();
+
+            entries.forEach((e, idx) => {
+                const rowNum = (STATE.page - 1) * STATE.limit + idx + 1;
+                let msgHtml = escapeHtml(e.sanitized_message);
+
+                if (keyword) {
+                    const regex = new RegExp(`(${escapeRegex(keyword)})`, 'gi');
+                    msgHtml = msgHtml.replace(regex, '<span class="highlight-match">$1</span>');
+                }
+
+                // Entity pills
+                let entitiesHtml = '';
+                if (e.entities && e.entities.length > 0) {
+                    entitiesHtml = e.entities.map(ent =>
+                        `<span class="entity-pill" onclick="quickScanEntity('${escapeHtml(ent)}')"><i class="fa fa-crosshairs"></i> ${escapeHtml(ent)}</span>`
+                    ).join(' ');
+                }
+
+                // If message had stripped content, wrap in interactive trigger
+                if (e.was_sanitized) {
+                    msgHtml = msgHtml.replace(/\[\/\*\s*([^*]+)\s*\*\/\]/g, `<span class="stripped-pill" onclick="openDetailModal('${e.id}')">$1</span>`);
+                }
+
+                html += `
+                    <tr>
+                        <td style="color: var(--text-muted);">${rowNum}</td>
+                        <td class="time-cell">${escapeHtml(e.timestamp || '')}</td>
+                        <td><span class="level-badge ${e.level}">${e.level}</span></td>
+                        <td style="color: var(--text-secondary); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(e.logger || '')}</td>
+                        <td>${entitiesHtml}</td>
+                        <td class="message-cell">${msgHtml}</td>
+                        <td style="text-align: center;">
+                            <button class="btn-ctrl" style="padding: 4px 8px; font-size: 11px;" onclick="openDetailModal('${e.id}')" title="Inspect Full Payload">
+                                <i class="fa fa-eye"></i> View
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // Pagination handlers
+        function updatePagination(data) {
+            STATE.totalPages = data.total_pages || 1;
+            const total = data.total_matched || 0;
+            const start = total === 0 ? 0 : (STATE.page - 1) * STATE.limit + 1;
+            const end = Math.min(total, STATE.page * STATE.limit);
+
+            document.getElementById('pag-start').textContent = start;
+            document.getElementById('pag-end').textContent = end;
+            document.getElementById('pag-total').textContent = total.toLocaleString();
+            document.getElementById('pag-current-page').textContent = `${STATE.page} / ${STATE.totalPages}`;
+
+            document.getElementById('pag-btn-prev').disabled = !data.has_prev;
+            document.getElementById('pag-btn-next').disabled = !data.has_next;
+        }
+
+        function goToPrevPage() {
+            if (STATE.page > 1) {
+                STATE.page--;
+                reloadCurrentLogs();
+            }
+        }
+
+        function goToNextPage() {
+            if (STATE.page < STATE.totalPages) {
+                STATE.page++;
+                reloadCurrentLogs();
+            }
+        }
+
+        function changePageSize(newSize) {
+            STATE.limit = parseInt(newSize, 10);
+            STATE.page = 1;
+            reloadCurrentLogs();
+        }
+
+        // Level Filter Tabs
+        function setMainLevelFilter(level) {
+            STATE.currentLevel = level;
+            STATE.page = 1;
+
+            document.querySelectorAll('#main-level-tabs .tab-btn').forEach(btn => {
+                if (btn.textContent.trim() === level) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            reloadCurrentLogs();
+        }
+
+        // Debounced search
+        let debounceTimer = null;
+        function debounceKeywordSearch() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                STATE.keyword = document.getElementById('main-keyword-input').value;
+                STATE.page = 1;
+                reloadCurrentLogs();
+            }, 250);
+        }
+
+        // Auto-refresh logic
+        function initAutoRefresh(seconds) {
+            if (STATE.autoRefreshTimer) {
+                clearInterval(STATE.autoRefreshTimer);
+                STATE.autoRefreshTimer = null;
+            }
+
+            if (seconds > 0) {
+                STATE.autoRefreshTimer = setInterval(() => {
+                    const icon = document.getElementById('refresh-icon');
+                    if (icon) icon.classList.add('fa-spin');
+                    loadOverview(STATE.activeFile);
+                    reloadCurrentLogs();
+                    setTimeout(() => {
+                        if (icon) icon.classList.remove('fa-spin');
+                    }, 600);
+                }, seconds * 1000);
+            }
+        }
+
+        function changeAutoRefresh(val) {
+            const secs = parseInt(val, 10);
+            initAutoRefresh(secs);
+        }
+
+        // Scope date range toggling
+        function toggleScopeDates(scope) {
+            const box = document.getElementById('scan-date-range-box');
+            if (box) {
+                box.style.display = scope === 'range' ? 'flex' : 'none';
+            }
+        }
+
+        // Quick scan from clicking entity badge
+        function quickScanEntity(entityId) {
+            document.getElementById('scan-entity-input').value = entityId;
+            executeScan();
+        }
+
+        // Execute targeted entity scan
+        function executeScan() {
+            const input = document.getElementById('scan-entity-input');
+            const entityId = (input.value || '').trim();
+            if (!entityId) {
+                input.focus();
+                return;
+            }
+
+            const btn = document.getElementById('scan-action-btn');
+            btn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> Scanning...`;
+            btn.disabled = true;
+
+            const scope = document.getElementById('scan-scope-select').value;
+            const startDate = document.getElementById('scan-start-date').value;
+            const endDate = document.getElementById('scan-end-date').value;
+            const level = document.getElementById('scan-level-select').value;
+
+            let url = `${URLS.scan}?id=${encodeURIComponent(entityId)}&file=${encodeURIComponent(STATE.activeFile)}&date_scope=${scope}&level=${level}`;
+            if (scope === 'range') {
+                if (startDate) url += `&start_date=${encodeURIComponent(startDate)}`;
+                if (endDate) url += `&end_date=${encodeURIComponent(endDate)}`;
+            }
+
+            fetch(url)
+                .then(r => r.json())
+                .then(data => {
+                    btn.innerHTML = `<i class="fa fa-play"></i> Scan & Trace`;
+                    btn.disabled = false;
+                    STATE.scanResult = data;
+                    renderTimelineBanner(data);
+                })
+                .catch(err => {
+                    btn.innerHTML = `<i class="fa fa-play"></i> Scan & Trace`;
+                    btn.disabled = false;
+                    alert('Scan failed: ' + err.message);
+                });
+        }
+
+        // Render timeline banner
+        function renderTimelineBanner(data) {
+            const banner = document.getElementById('entity-timeline-banner');
+            banner.style.display = 'flex';
+
+            document.getElementById('tb-entity-pill').textContent = '#' + data.entity_id;
+            document.getElementById('tb-summary-text').textContent = `Found ${data.total_found} events`;
+            document.getElementById('tb-scope-pill').textContent = data.scope || 'Selected Scope';
+            document.getElementById('tb-latency-text').textContent = `${data.elapsed_ms} ms`;
+
+            const counts = data.levels_count || {};
+            document.getElementById('tb-cnt-all').textContent = counts.all || 0;
+            document.getElementById('tb-cnt-err').textContent = (counts.error || 0) + (counts.critical || 0);
+            document.getElementById('tb-cnt-warn').textContent = counts.warn || 0;
+            document.getElementById('tb-cnt-info').textContent = counts.info || 0;
+            document.getElementById('tb-cnt-debug').textContent = counts.debug || 0;
+
+            filterTimelineLevel('ALL');
+        }
+
+        function filterTimelineLevel(lvl) {
+            STATE.activeScanLevel = lvl;
+            document.querySelectorAll('#tb-severity-tabs .tab-btn').forEach(btn => {
+                if (btn.textContent.includes(lvl)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            if (!STATE.scanResult) return;
+            const timeline = STATE.scanResult.timeline || [];
+            const filtered = timeline.filter(ev => {
+                if (lvl === 'ALL') return true;
+                if (lvl === 'ERROR') return ['ERROR', 'CRITICAL', 'FATAL'].includes(ev.level);
+                if (lvl === 'WARN') return ['WARN', 'WARNING'].includes(ev.level);
+                return ev.level === lvl;
+            });
+
+            renderTimelineNodes(filtered);
+        }
+
+        function switchTimelineView(mode) {
+            STATE.timelineViewMode = mode;
+            document.getElementById('btn-view-timeline').classList.toggle('active', mode === 'timeline');
+            document.getElementById('btn-view-table').classList.toggle('active', mode === 'table');
+            filterTimelineLevel(STATE.activeScanLevel);
+        }
+
+        function renderTimelineNodes(events) {
+            const box = document.getElementById('timeline-nodes-box');
+            if (!events || events.length === 0) {
+                box.innerHTML = `<div style="padding: 16px; color: var(--text-muted); font-size: 13px;">No events match the ${STATE.activeScanLevel} filter.</div>`;
+                return;
+            }
+
+            if (STATE.timelineViewMode === 'table') {
+                let tblHtml = `
+                    <table class="log-table" style="background: var(--bg-card); border-radius: var(--radius-sm);">
+                        <thead>
+                            <tr>
+                                <th>Step</th>
+                                <th>Timestamp</th>
+                                <th>Level</th>
+                                <th>Stage</th>
+                                <th>Message</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                events.forEach(ev => {
+                    tblHtml += `
+                        <tr>
+                            <td>#${ev.step}</td>
+                            <td class="time-cell">${escapeHtml(ev.timestamp)}</td>
+                            <td><span class="level-badge ${ev.level}">${ev.level}</span></td>
+                            <td><span class="stage-pill ${ev.stage_color}">${escapeHtml(ev.stage)}</span></td>
+                            <td class="message-cell">${escapeHtml(ev.message_sanitized)}</td>
+                            <td><button class="btn-ctrl" style="padding: 3px 6px; font-size: 11px;" onclick="openDetailModal('${ev.id}')">View</button></td>
+                        </tr>
+                    `;
+                });
+                tblHtml += `</tbody></table>`;
+                box.innerHTML = tblHtml;
+                return;
+            }
+
+            let nodesHtml = '';
+            events.forEach(ev => {
+                nodesHtml += `
+                    <div class="timeline-step-node">
+                        <div class="step-circle" style="background: var(--${ev.stage_color === 'red' ? 'level-error' : 'accent-blue'});"></div>
+                        <div class="timeline-node-card">
+                            <div class="node-card-top">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-weight: 700; color: var(--text-primary);">Step #${ev.step}</span>
+                                    <span class="stage-pill ${ev.stage_color}">${escapeHtml(ev.stage)}</span>
+                                    <span class="level-badge ${ev.level}">${ev.level}</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span class="time-cell">${escapeHtml(ev.timestamp)}</span>
+                                    <button class="btn-ctrl" style="padding: 2px 7px; font-size: 11px;" onclick="openDetailModal('${ev.id}')">Inspect</button>
+                                </div>
+                            </div>
+                            <div class="message-cell" style="margin-top: 4px;">${escapeHtml(ev.message_sanitized)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            box.innerHTML = nodesHtml;
+        }
+
+        function closeTimelineBanner() {
+            document.getElementById('entity-timeline-banner').style.display = 'none';
+        }
+
+        // Detail Modal
+        function openDetailModal(detailId) {
+            fetch(`${URLS.detail}?id=${encodeURIComponent(detailId)}`)
+                .then(r => r.json())
+                .then(data => {
+                    STATE.currentDetailData = data;
+                    document.getElementById('modal-level-badge').className = `level-badge ${data.level}`;
+                    document.getElementById('modal-level-badge').textContent = data.level;
+                    document.getElementById('modal-timestamp').textContent = data.timestamp || '';
+                    document.getElementById('modal-logger').textContent = `${data.logger || ''} (${data.file})`;
+
+                    // Sanitized alert
+                    const banner = document.getElementById('modal-sanitized-banner');
+                    banner.style.display = data.was_sanitized ? 'flex' : 'none';
+
+                    // Entity buttons
+                    const entBox = document.getElementById('modal-entities-box');
+                    entBox.innerHTML = '';
+                    if (data.entities && data.entities.length > 0) {
+                        data.entities.forEach(ent => {
+                            const btn = document.createElement('button');
+                            btn.className = 'entity-pill';
+                            btn.innerHTML = `<i class="fa fa-crosshairs"></i> Trace ${escapeHtml(ent)}`;
+                            btn.onclick = () => { closeModal(); quickScanEntity(ent); };
+                            entBox.appendChild(btn);
+                        });
+                    }
+
+                    // Raw payload
+                    const rawBox = document.getElementById('modal-raw-payload');
+                    rawBox.textContent = data.raw_message;
+
+                    document.getElementById('detail-modal').classList.add('active');
+                })
+                .catch(err => alert('Failed to retrieve log details: ' + err.message));
+        }
+
+        function closeModal() {
+            document.getElementById('detail-modal').classList.remove('active');
+        }
+
+        function formatModalJSON() {
+            if (!STATE.currentDetailData) return;
+            const rawBox = document.getElementById('modal-raw-payload');
+            try {
+                if (STATE.currentDetailData.is_json && STATE.currentDetailData.json_data) {
+                    rawBox.textContent = JSON.stringify(STATE.currentDetailData.json_data, null, 2);
+                } else {
+                    const parsed = JSON.parse(STATE.currentDetailData.raw_message);
+                    rawBox.textContent = JSON.stringify(parsed, null, 2);
+                }
+            } catch (e) {
+                alert('Payload is not valid JSON.');
+            }
+        }
+
+        function copyModalPayload() {
+            if (!STATE.currentDetailData) return;
+            const rawText = STATE.currentDetailData.raw_message;
+            navigator.clipboard.writeText(rawText).then(() => {
+                const label = document.getElementById('btn-copy-label');
+                label.textContent = 'Copied!';
+                setTimeout(() => { label.textContent = 'Copy Payload'; }, 1500);
+            });
+        }
+
+        // Export Logs
+        function exportLogs(format) {
+            const url = `${URLS.export}?file=${encodeURIComponent(STATE.activeFile)}&format=${format}&level=${STATE.currentLevel}&keyword=${encodeURIComponent(STATE.keyword)}`;
+            window.location.href = url;
+        }
+
+        // Utilities
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+    </script>
+</body>
+</html>
